@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WesWorld Admin Inbox</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/img/Wesworldlogo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Poppins:wght@600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-page">
+  <header class="admin-header">
+    <div class="container admin-header-content">
+      <a class="admin-brand" href="/admin">
+        <img src="/img/wesworldlogo-wordmark.png" alt="WesWorld logo">
+      </a>
+      <div class="admin-header-text">
+        <h1><span class="admin-title-accent">WesWorld</span> Contact Inbox</h1>
+        <p>Recent contact form submissions from your website.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <section class="admin-panel">
+      <div class="container">
+        <div class="admin-toolbar">
+          <button class="btn btn-primary" id="refresh-messages" type="button">Refresh</button>
+          <span class="admin-status" id="admin-status">Loading messages...</span>
+        </div>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Service</th>
+                <th>Message</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody id="message-rows">
+              <tr>
+                <td colspan="7">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="admin-cards" id="message-cards"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="admin-modal" id="admin-modal" aria-hidden="true">
+    <div class="admin-modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+      <h3 id="admin-modal-title">Delete this message?</h3>
+      <p>This action cannot be undone.</p>
+      <div class="admin-modal-actions">
+        <button class="btn btn-outline" type="button" id="admin-cancel">No, keep it</button>
+        <button class="btn btn-primary" type="button" id="admin-confirm">Yes, delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('admin-status');
+    const rowsEl = document.getElementById('message-rows');
+    const cardsEl = document.getElementById('message-cards');
+    const refreshBtn = document.getElementById('refresh-messages');
+    const modalEl = document.getElementById('admin-modal');
+    const cancelBtn = document.getElementById('admin-cancel');
+    const confirmBtn = document.getElementById('admin-confirm');
+    let pendingDeleteId = null;
+
+    const formatDate = (value) => {
+      const date = value ? new Date(value) : null;
+      if (!date || Number.isNaN(date.getTime())) return 'Unknown';
+      return date.toLocaleString();
+    };
+
+    const renderEmpty = () => {
+      rowsEl.innerHTML = '<tr><td colspan="7">No submissions yet.</td></tr>';
+      cardsEl.innerHTML = '<p class="admin-empty">No submissions yet.</p>';
+      statusEl.textContent = 'No submissions yet.';
+    };
+
+    const closeModal = () => {
+      modalEl.classList.remove('open');
+      modalEl.setAttribute('aria-hidden', 'true');
+      pendingDeleteId = null;
+    };
+
+    const handleDelete = async (id) => {
+      if (!id) return;
+      pendingDeleteId = id;
+      modalEl.classList.add('open');
+      modalEl.setAttribute('aria-hidden', 'false');
+    };
+
+    const confirmDelete = async () => {
+      const id = pendingDeleteId;
+      if (!id) return;
+      statusEl.textContent = 'Deleting message...';
+      statusEl.classList.remove('success', 'error');
+      try {
+        const response = await fetch('/api/messages/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data.message || 'Delete failed.');
+        }
+        statusEl.textContent = 'Message deleted.';
+        statusEl.classList.add('success');
+        loadMessages();
+      } catch (error) {
+        statusEl.textContent = 'Unable to delete message.';
+        statusEl.classList.add('error');
+      }
+      closeModal();
+    };
+
+    const createDeleteButton = (id) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'admin-delete';
+      button.textContent = 'Delete';
+      button.addEventListener('click', () => handleDelete(id));
+      return button;
+    };
+
+    const renderMessages = (messages) => {
+      rowsEl.innerHTML = '';
+      cardsEl.innerHTML = '';
+
+      if (!messages.length) {
+        renderEmpty();
+        return;
+      }
+
+      statusEl.textContent = `Showing ${messages.length} submissions`;
+
+      messages.forEach((message) => {
+        const row = document.createElement('tr');
+        const cells = [
+          formatDate(message.createdAt),
+          message.name || '-',
+          message.email || '-',
+          message.phone || '-',
+          message.service || '-',
+          message.message || '-'
+        ];
+
+        cells.forEach((text) => {
+          const cell = document.createElement('td');
+          cell.textContent = text;
+          row.appendChild(cell);
+        });
+
+        const actionCell = document.createElement('td');
+        actionCell.appendChild(createDeleteButton(message.id));
+        row.appendChild(actionCell);
+
+        rowsEl.appendChild(row);
+
+        const card = document.createElement('div');
+        card.className = 'admin-card';
+        card.innerHTML = `
+          <div class="admin-card-header">
+            <strong>${message.name || 'Unknown'}</strong>
+            <span>${formatDate(message.createdAt)}</span>
+          </div>
+          <p><strong>Email:</strong> ${message.email || '-'}</p>
+          <p><strong>Phone:</strong> ${message.phone || '-'}</p>
+          <p><strong>Service:</strong> ${message.service || '-'}</p>
+          <p class="admin-card-message">${message.message || '-'}</p>
+        `;
+        card.appendChild(createDeleteButton(message.id));
+        cardsEl.appendChild(card);
+      });
+    };
+
+    const loadMessages = async () => {
+      statusEl.textContent = 'Loading messages...';
+      statusEl.classList.remove('success', 'error');
+      try {
+        const response = await fetch('/api/messages');
+        const data = await response.json();
+        renderMessages(Array.isArray(data) ? data : []);
+      } catch (error) {
+        statusEl.textContent = 'Unable to load messages.';
+        rowsEl.innerHTML = '<tr><td colspan="7">Error loading submissions.</td></tr>';
+      }
+    };
+
+    refreshBtn.addEventListener('click', loadMessages);
+    cancelBtn.addEventListener('click', closeModal);
+    confirmBtn.addEventListener('click', confirmDelete);
+    modalEl.addEventListener('click', (event) => {
+      if (event.target === modalEl) closeModal();
+    });
+    loadMessages();
+  </script>
+</body>
+</html>

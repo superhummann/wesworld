@@ -1,0 +1,13 @@
+<svg width="800" height="1000" viewBox="0 0 800 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="1000" rx="60" fill="url(#paint0_linear)"/>
+  <circle cx="400" cy="340" r="140" fill="rgba(255,255,255,0.35)"/>
+  <rect x="220" y="520" width="360" height="220" rx="50" fill="rgba(255,255,255,0.3)"/>
+  <text x="50%" y="56%" text-anchor="middle" fill="#ffffff" font-family="Poppins, Arial, sans-serif" font-size="42" font-weight="600">Wes</text>
+  <text x="50%" y="62%" text-anchor="middle" fill="#e2e8f0" font-family="Inter, Arial, sans-serif" font-size="22">Brand Consultant</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="40" y1="40" x2="760" y2="960" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+</svg>

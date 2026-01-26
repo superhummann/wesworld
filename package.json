@@ -1,0 +1,17 @@
+{
+  "name": "wesworld",
+  "version": "1.0.0",
+  "description": "WesWorld personal brand website and systems consulting showcase.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "nodemailer": "^7.0.12"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
