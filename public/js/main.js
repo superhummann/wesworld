@@ -110,7 +110,7 @@ sections.forEach((section) => {
 
 const revealItems = Array.from(revealSet);
 if (revealItems.length) {
-  if (reduceMotion) {
+  if (reduceMotion || !('IntersectionObserver' in window)) {
     revealItems.forEach((item) => item.classList.add('is-visible'));
   } else {
     const observer = new IntersectionObserver(
@@ -122,7 +122,7 @@ if (revealItems.length) {
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0 }
     );
 
     revealItems.forEach((item) => observer.observe(item));
