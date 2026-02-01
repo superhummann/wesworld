@@ -1,5 +1,4 @@
+---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/orenansf/public_html/wesworld.online/
-    - /bin/mkdir -p $DEPLOYPATH
-    - /bin/cp -R public/. $DEPLOYPATH
+    - /bin/cp -R public/. /home/orenansf/public_html/wesworld.online/
