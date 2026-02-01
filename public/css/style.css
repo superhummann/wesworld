@@ -1573,6 +1573,12 @@ a.blog-card {
   box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
 }
 
+.blog-post-content.reveal {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
 .blog-post-content p {
   color: #475569;
   margin-bottom: 1rem;
@@ -2215,6 +2221,12 @@ a.blog-card {
 
   .blog-post-content {
     padding: 1.6rem;
+  }
+
+  .blog-post-content.reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
   }
 
   .blog-suggestions .blog-grid {
