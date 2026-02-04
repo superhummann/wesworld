@@ -4314,6 +4314,12 @@ a.blog-card {
   }
 }
 
+.blog-post-content.reveal {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
 .cursor-glow {
   position: fixed;
   width: 38px;
